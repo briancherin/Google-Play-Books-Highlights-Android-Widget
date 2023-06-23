@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
-import android.widget.TextView
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -125,7 +124,7 @@ class MainActivity : AppCompatActivity() {
 
 
     fun loadHighlightsBrowser() {
-        startActivity(Intent(this, HighlightsBrowser::class.java))
+        startActivity(Intent(this, TitlesBrowser::class.java))
     }
 
 

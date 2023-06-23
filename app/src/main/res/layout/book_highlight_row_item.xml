@@ -8,22 +8,20 @@
     android:layout_marginRight="60px">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/bookTitleRowCardView"
+        android:id="@+id/bookHighlightRowCardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:clickable="true"
         card_view:cardCornerRadius="4dp"
         card_view:contentPadding="50px">
 
         <TextView
-            android:id="@+id/bookTitleRowTextView"
+            android:id="@+id/bookHighlightRowTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:fontFamily="sans-serif-medium"
             android:text="Sample Text"
-            android:textAlignment="center"
             android:textSize="20sp" />
     </androidx.cardview.widget.CardView>
 

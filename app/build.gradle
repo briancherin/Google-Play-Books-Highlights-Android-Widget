@@ -3,7 +3,11 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'com.google.gms.google-services'
+
+    id("kotlin-parcelize")
 }
+
+apply plugin: "kotlinx-serialization"
 
 def secretsProperties = new Properties()
 def secretsFile = rootProject.file('secrets.properties')
@@ -71,4 +75,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-database-ktx'
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
+
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
 }

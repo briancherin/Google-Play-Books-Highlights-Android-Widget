@@ -1,5 +1,9 @@
 package com.corson.playbookshighlightswidget.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Highlight (
     var bookLink: String? = "",
     var bookTitle: String? = "",
@@ -8,7 +12,7 @@ data class Highlight (
     var highlightNotes: String? = "",
     var quoteIsFavorited: Boolean? = false,
     var quoteText: String? = "",
-)
+) : Parcelable
 
 /*
 *

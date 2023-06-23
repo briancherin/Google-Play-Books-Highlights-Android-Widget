@@ -1,21 +1,29 @@
 package com.corson.playbookshighlightswidget.higlights_recycler_view
 
+import android.content.Intent
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.corson.playbookshighlightswidget.HighlightsBrowser
 import com.corson.playbookshighlightswidget.R
+import com.corson.playbookshighlightswidget.model.BookHighlights
 
 // https://developer.android.com/develop/ui/views/layout/recyclerview#kotlin
-class BookTitlesAdapter(private val titlesList: ArrayList<String>) :
+class BookTitlesAdapter(private val bookList: ArrayList<BookHighlights>) :
         RecyclerView.Adapter<BookTitlesAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textView: TextView
+        val cardView: CardView
 
         init {
             textView = view.findViewById(R.id.bookTitleRowTextView)
+            cardView = view.findViewById(R.id.bookTitleRowCardView)
         }
 
     }
@@ -28,10 +36,23 @@ class BookTitlesAdapter(private val titlesList: ArrayList<String>) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textView.text = titlesList[position]
+        holder.textView.text = bookList[position].title
+
+        val context = holder.itemView.context
+
+        holder.cardView.setOnClickListener {
+            startActivity(context, Intent(context, HighlightsBrowser::class.java).apply {
+
+                val quotesList = bookList[position].quotes
+
+
+                putParcelableArrayListExtra("highlights", quotesList)
+            }, null)
+        }
+
     }
 
     override fun getItemCount(): Int {
-        return titlesList.size
+        return bookList.size
     }
 }
