@@ -26,14 +26,12 @@ class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight>) :
                 val cardView: CardView
                 val dateTextView: TextView
                 val noteButton: ImageButton
-                val linkButton: ImageButton
 
                 init {
                         highlightTextTextView = view.findViewById(R.id.bookHighlightRowTextView)
                         cardView = view.findViewById(R.id.bookHighlightRowCardView)
                         dateTextView = view.findViewById(R.id.bookHighlightRowDate)
                         noteButton = view.findViewById(R.id.bookHighlightRowNotesButton)
-                        linkButton = view.findViewById(R.id.bookHighlightRowLinkButton)
                 }
 
         }
@@ -59,18 +57,20 @@ class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight>) :
                         holder.noteButton.visibility = View.GONE
                 }
 
-                holder.linkButton.setOnClickListener {
-                        startActivity(
-                                context,
-                                Intent(Intent.ACTION_VIEW, Uri.parse(highlight.bookLink)),
-                                null
-                        )
-                }
 
                 holder.cardView.setOnClickListener {
                         startActivity(context, Intent(context, SingleHighlight::class.java).apply {
                                 putExtra("highlight", highlight)
                         }, null)
+                }
+
+                holder.noteButton.setOnClickListener {
+                        val builder = AlertDialog.Builder(context)
+                        builder.apply {
+                                setMessage(highlight.highlightNotes)
+                        }
+                        builder.create()
+                        builder.show()
                 }
         }
 

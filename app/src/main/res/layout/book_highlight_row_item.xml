@@ -34,22 +34,6 @@
                 card_view:layout_constraintEnd_toEndOf="parent"
                 card_view:layout_constraintTop_toBottomOf="@+id/bookHighlightRowTextView" />
 
-            <ImageButton
-                android:id="@+id/bookHighlightRowLinkButton"
-                android:layout_width="50dp"
-                android:layout_height="48dp"
-                android:background="@null"
-                android:contentDescription="link to book"
-                android:scaleType="centerInside"
-                android:scaleX="1.5"
-                android:scaleY="1.5"
-                android:src="@drawable/ic_baseline_link_24"
-                android:visibility="visible"
-                card_view:layout_constraintBottom_toBottomOf="parent"
-                card_view:layout_constraintEnd_toStartOf="@+id/bookHighlightRowNotesButton"
-                card_view:layout_constraintTop_toBottomOf="@+id/bookHighlightRowTextView"
-                card_view:layout_constraintVertical_bias="0.0" />
-
             <TextView
                 android:id="@+id/bookHighlightRowDate"
                 android:layout_width="wrap_content"
