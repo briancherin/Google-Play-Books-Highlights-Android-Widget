@@ -3,7 +3,6 @@ package com.corson.playbookshighlightswidget.higlights_recycler_view
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +17,7 @@ import com.corson.playbookshighlightswidget.SingleHighlight
 import com.corson.playbookshighlightswidget.model.Highlight
 
 // https://developer.android.com/develop/ui/views/layout/recyclerview#kotlin
-class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight>) :
+class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight?>) :
         RecyclerView.Adapter<BookHighlightsAdapter.ViewHolder>() {
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -47,11 +46,11 @@ class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight>) :
                 val highlight = highlightsList[position]
                 val context = holder.itemView.context
 
-                holder.highlightTextTextView.text = highlight.quoteText
-                holder.cardView.setCardBackgroundColor(Color.parseColor(highlight.highlightColor))
-                holder.dateTextView.text = highlight.dateHighlighted
+                holder.highlightTextTextView.text = highlight?.quoteText
+                holder.cardView.setCardBackgroundColor(Color.parseColor(highlight?.highlightColor))
+                holder.dateTextView.text = highlight?.dateHighlighted
 
-                if (highlight.highlightNotes != null && highlight.highlightNotes!!.isNotEmpty()) {
+                if (highlight?.highlightNotes != null && highlight.highlightNotes!!.isNotEmpty()) {
                         holder.noteButton.visibility = View.VISIBLE
                 } else {
                         holder.noteButton.visibility = View.GONE
@@ -67,7 +66,7 @@ class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight>) :
                 holder.noteButton.setOnClickListener {
                         val builder = AlertDialog.Builder(context)
                         builder.apply {
-                                setMessage(highlight.highlightNotes)
+                                setMessage(highlight?.highlightNotes)
                         }
                         builder.create()
                         builder.show()

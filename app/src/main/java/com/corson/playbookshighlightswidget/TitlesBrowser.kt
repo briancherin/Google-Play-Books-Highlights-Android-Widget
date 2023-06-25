@@ -6,10 +6,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
+import android.view.Menu
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.appcompat.widget.SearchView
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -41,8 +43,6 @@ class TitlesBrowser : AppCompatActivity() {
             Firebase.auth.signOut()
             startActivity(Intent(this, MainActivity::class.java))
         }
-
-        searchBoxEditText = findViewById<EditText>(R.id.editTextBookTitleSearchField)
 
         recyclerView = findViewById(R.id.bookTitlesRecyclerView)
         recyclerView.setHasFixedSize(true)
@@ -88,38 +88,34 @@ class TitlesBrowser : AppCompatActivity() {
 
         }
 
-
-
-        searchBoxEditText.doAfterTextChanged {
-            val query = it.toString()
-
-//            if (query.length > 3) {
-                filterTitles(query)
-//            }
-        }
-
-        searchBoxEditText.setOnEditorActionListener { textView: TextView, actionId: Int, keyEvent: KeyEvent ->
-            when (actionId) {
-                EditorInfo.IME_ACTION_DONE -> {
-                    // User hits enter on search
-
-                    val query = searchBoxEditText.text.toString()
-                    filterTitles(query)
-
-                    true
-                }
-                else ->
-                    false
-            }
-        }
-
-
     }
 
-    private fun filterTitles(query: String) {
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.search_menu, menu)
+        val searchItem = menu?.findItem(R.id.menuActionSearch)
+        val searchView = searchItem?.actionView as SearchView
+        searchView.queryHint = "Search book title..."
+
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextChange(p0: String?): Boolean {
+                filterTitles(p0)
+                return false
+            }
+
+            override fun onQueryTextSubmit(p0: String?): Boolean {
+                filterTitles(p0)
+                return false
+            }
+        })
+
+        return true
+    }
+
+    private fun filterTitles(query: String?) {
 
         filteredBookList.clear()
-        filteredBookList.addAll(bookList.filter { it.title != null && it.title!!.lowercase().contains(query.lowercase())  })
+        filteredBookList.addAll(bookList.filter { it.title != null && it.title!!.lowercase().contains(query!!.lowercase())  })
 
         recyclerView.adapter?.notifyDataSetChanged()
     }
