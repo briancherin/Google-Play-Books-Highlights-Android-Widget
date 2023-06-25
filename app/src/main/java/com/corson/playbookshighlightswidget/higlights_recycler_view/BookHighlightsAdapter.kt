@@ -1,5 +1,6 @@
 package com.corson.playbookshighlightswidget.higlights_recycler_view
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -13,6 +14,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.corson.playbookshighlightswidget.R
+import com.corson.playbookshighlightswidget.SingleHighlight
 import com.corson.playbookshighlightswidget.model.Highlight
 
 // https://developer.android.com/develop/ui/views/layout/recyclerview#kotlin
@@ -45,6 +47,7 @@ class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight>) :
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
                 val highlight = highlightsList[position]
+                val context = holder.itemView.context
 
                 holder.highlightTextTextView.text = highlight.quoteText
                 holder.cardView.setCardBackgroundColor(Color.parseColor(highlight.highlightColor))
@@ -58,10 +61,16 @@ class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight>) :
 
                 holder.linkButton.setOnClickListener {
                         startActivity(
-                                holder.itemView.context,
+                                context,
                                 Intent(Intent.ACTION_VIEW, Uri.parse(highlight.bookLink)),
                                 null
                         )
+                }
+
+                holder.cardView.setOnClickListener {
+                        startActivity(context, Intent(context, SingleHighlight::class.java).apply {
+                                putExtra("highlight", highlight)
+                        }, null)
                 }
         }
 
