@@ -15,14 +15,67 @@
         card_view:cardCornerRadius="4dp"
         card_view:contentPadding="50px">
 
-        <TextView
-            android:id="@+id/bookHighlightRowTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:fontFamily="sans-serif-medium"
-            android:text="Sample Text"
-            android:textSize="20sp" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/bookHighlightRowNotesButton"
+                android:layout_width="50dp"
+                android:layout_height="48dp"
+                android:background="@null"
+                android:contentDescription="Note"
+                android:scaleType="centerInside"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                android:src="@drawable/ic_baseline_note_24"
+                android:visibility="visible"
+                card_view:layout_constraintBottom_toBottomOf="parent"
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:layout_constraintTop_toBottomOf="@+id/bookHighlightRowTextView" />
+
+            <ImageButton
+                android:id="@+id/bookHighlightRowLinkButton"
+                android:layout_width="50dp"
+                android:layout_height="48dp"
+                android:background="@null"
+                android:contentDescription="link to book"
+                android:scaleType="centerInside"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                android:src="@drawable/ic_baseline_link_24"
+                android:visibility="visible"
+                card_view:layout_constraintBottom_toBottomOf="parent"
+                card_view:layout_constraintEnd_toStartOf="@+id/bookHighlightRowNotesButton"
+                card_view:layout_constraintTop_toBottomOf="@+id/bookHighlightRowTextView"
+                card_view:layout_constraintVertical_bias="0.0" />
+
+            <TextView
+                android:id="@+id/bookHighlightRowDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="Date"
+                android:textSize="15sp"
+                card_view:layout_constraintBottom_toBottomOf="parent"
+                card_view:layout_constraintStart_toStartOf="parent"
+                card_view:layout_constraintTop_toBottomOf="@+id/bookHighlightRowTextView" />
+
+            <TextView
+                android:id="@+id/bookHighlightRowTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="sans-serif-medium"
+                android:text="Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text Sample Text "
+                android:textSize="20sp"
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:layout_constraintStart_toStartOf="parent"
+                card_view:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.cardview.widget.CardView>
 
 </FrameLayout>
