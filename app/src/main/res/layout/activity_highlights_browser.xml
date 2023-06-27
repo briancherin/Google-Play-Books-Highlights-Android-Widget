@@ -31,7 +31,7 @@
 
             <TextView
                 android:id="@+id/highlightsBrowserBookTitleText"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="13dp"
                 android:scrollbars="horizontal"

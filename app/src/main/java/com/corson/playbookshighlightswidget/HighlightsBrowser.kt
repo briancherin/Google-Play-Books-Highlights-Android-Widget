@@ -1,20 +1,28 @@
 package com.corson.playbookshighlightswidget
 
+import android.content.ContentValues
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.corson.playbookshighlightswidget.higlights_recycler_view.BookHighlightsAdapter
+import com.corson.playbookshighlightswidget.higlights_recycler_view.BookTitlesAdapter
 import com.corson.playbookshighlightswidget.model.Highlight
+import com.corson.playbookshighlightswidget.util.DatabaseHelper
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class HighlightsBrowser : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
 
-    private lateinit var highlightsList: ArrayList<Highlight?>
+    private lateinit var highlightsList: ArrayList<Highlight>
     private lateinit var filteredHighlightsList: ArrayList<Highlight?>
 
 
@@ -26,12 +34,44 @@ class HighlightsBrowser : AppCompatActivity() {
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        highlightsList = intent.getParcelableArrayListExtra<Highlight>("highlights") as ArrayList
-        filteredHighlightsList = ArrayList(highlightsList)
+        val title = intent.getStringExtra("bookTitle")
 
-        findViewById<TextView>(R.id.highlightsBrowserBookTitleText).text = highlightsList[0]?.bookTitle
+        val showingAllBooks = title == null || title.isEmpty()
 
-        recyclerView.adapter = BookHighlightsAdapter(filteredHighlightsList)
+        findViewById<TextView>(R.id.highlightsBrowserBookTitleText).text = if(showingAllBooks) "All books" else title
+
+
+        lifecycleScope.launch {
+            try {
+                val bookList = DatabaseHelper().fetchBookHighlights()
+
+                if (!showingAllBooks) {
+                    highlightsList = bookList.find { obj -> obj.title == title }?.quotes ?: ArrayList()
+
+                } else {
+                    highlightsList = ArrayList(bookList.flatMap {it.quotes!!})
+/*
+                    highlightsList.sortByDescending {
+                        try {
+                            LocalDate.parse(
+                                it.dateHighlighted,
+                                DateTimeFormatter.ofPattern("MMMM d, yyyy")
+                            )
+                        } catch(e: Exception) { null}
+
+                    }*/
+
+                }
+
+
+                filteredHighlightsList = ArrayList(highlightsList)
+
+                recyclerView.adapter = BookHighlightsAdapter(filteredHighlightsList, showingAllBooks)
+
+            } catch (e: Exception) {
+                Log.w(ContentValues.TAG, "Error fetching book highlights", e)
+            }
+        }
 
         findViewById<TextView>(R.id.backButton).setOnClickListener { finish() }
     }

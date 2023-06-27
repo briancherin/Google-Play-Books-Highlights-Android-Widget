@@ -17,7 +17,7 @@ import com.corson.playbookshighlightswidget.SingleHighlight
 import com.corson.playbookshighlightswidget.model.Highlight
 
 // https://developer.android.com/develop/ui/views/layout/recyclerview#kotlin
-class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight?>) :
+class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight?>, private val shouldShowBookTitle: Boolean) :
         RecyclerView.Adapter<BookHighlightsAdapter.ViewHolder>() {
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -25,12 +25,14 @@ class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight?>) :
                 val cardView: CardView
                 val dateTextView: TextView
                 val noteButton: ImageButton
+                val bookTitleText: TextView
 
                 init {
                         highlightTextTextView = view.findViewById(R.id.bookHighlightRowTextView)
                         cardView = view.findViewById(R.id.bookHighlightRowCardView)
                         dateTextView = view.findViewById(R.id.bookHighlightRowDate)
                         noteButton = view.findViewById(R.id.bookHighlightRowNotesButton)
+                        bookTitleText = view.findViewById(R.id.bookHighlightRowBookTitle)
                 }
 
         }
@@ -54,6 +56,13 @@ class BookHighlightsAdapter(private val highlightsList: ArrayList<Highlight?>) :
                         holder.noteButton.visibility = View.VISIBLE
                 } else {
                         holder.noteButton.visibility = View.GONE
+                }
+
+                if (shouldShowBookTitle) {
+                        holder.bookTitleText.visibility = View.VISIBLE
+                        holder.bookTitleText.text = highlight?.bookTitle
+                } else {
+                        holder.bookTitleText.visibility = View.GONE
                 }
 
 

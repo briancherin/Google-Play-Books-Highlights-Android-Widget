@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/nav_global_search"
+        android:title="Search all highlights/notes"
+        />
+    <item
+        android:id="@+id/nav_show_notes_toggle"
+        android:title="Show notes under highlights"
+        app:showAsAction="always"
+        app:actionViewClass="android.widget.Switch"
+        />
+
+</menu>

@@ -11,6 +11,8 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 
     <string name="default_web_client_id" translatable="false">1015363394439-jubkmvn0a9htppuf523p8j5kgko06dg4.apps.googleusercontent.com</string>
+    <string name="nav_open">Open</string>
+    <string name="nav_close">Close</string>
 
 
 </resources>

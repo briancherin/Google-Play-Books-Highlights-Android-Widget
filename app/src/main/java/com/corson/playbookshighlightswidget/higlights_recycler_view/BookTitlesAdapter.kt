@@ -42,11 +42,7 @@ class BookTitlesAdapter(private val bookList: ArrayList<BookHighlights>) :
 
         holder.cardView.setOnClickListener {
             startActivity(context, Intent(context, HighlightsBrowser::class.java).apply {
-
-                val quotesList = bookList[position].quotes
-
-
-                putParcelableArrayListExtra("highlights", quotesList)
+                putExtra("bookTitle", bookList[position].title)
             }, null)
         }
 
