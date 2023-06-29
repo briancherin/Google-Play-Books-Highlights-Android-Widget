@@ -7,8 +7,7 @@ import kotlin.random.Random
 import kotlin.random.nextInt
 
 class FirebaseFunctionsHelper {
-    fun refreshHighlights(): Task<String> {
-        val taskId = Random.nextInt(1000000)
+    fun refreshHighlights(taskId: Int): Task<String> {
 
         val data = hashMapOf(
             "taskId" to taskId

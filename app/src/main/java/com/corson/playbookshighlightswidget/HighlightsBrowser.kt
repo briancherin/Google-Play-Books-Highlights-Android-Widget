@@ -40,38 +40,20 @@ class HighlightsBrowser : AppCompatActivity() {
 
         findViewById<TextView>(R.id.highlightsBrowserBookTitleText).text = if(showingAllBooks) "All books" else title
 
+        DatabaseHelper().fetchBookHighlights({bookList ->
+            if (!showingAllBooks) {
+                highlightsList = bookList.find { obj -> obj.title == title }?.quotes ?: ArrayList()
 
-        lifecycleScope.launch {
-            try {
-                val bookList = DatabaseHelper().fetchBookHighlights()
-
-                if (!showingAllBooks) {
-                    highlightsList = bookList.find { obj -> obj.title == title }?.quotes ?: ArrayList()
-
-                } else {
-                    highlightsList = ArrayList(bookList.flatMap {it.quotes!!})
-/*
-                    highlightsList.sortByDescending {
-                        try {
-                            LocalDate.parse(
-                                it.dateHighlighted,
-                                DateTimeFormatter.ofPattern("MMMM d, yyyy")
-                            )
-                        } catch(e: Exception) { null}
-
-                    }*/
-
-                }
-
-
-                filteredHighlightsList = ArrayList(highlightsList)
-
-                recyclerView.adapter = BookHighlightsAdapter(filteredHighlightsList, showingAllBooks)
-
-            } catch (e: Exception) {
-                Log.w(ContentValues.TAG, "Error fetching book highlights", e)
+            } else {
+                highlightsList = ArrayList(bookList.flatMap {it.quotes!!})
             }
-        }
+
+            filteredHighlightsList = ArrayList(highlightsList)
+
+            recyclerView.adapter = BookHighlightsAdapter(filteredHighlightsList, showingAllBooks)
+        }, { e ->
+            Log.w(ContentValues.TAG, "Error fetching book highlights", e)
+        })
 
         findViewById<TextView>(R.id.backButton).setOnClickListener { finish() }
     }

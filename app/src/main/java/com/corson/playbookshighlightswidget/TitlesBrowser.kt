@@ -1,21 +1,22 @@
 package com.corson.playbookshighlightswidget
 
+import android.app.Dialog
 import android.content.ContentValues.TAG
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
-import android.view.inputmethod.EditorInfo
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
-import androidx.core.widget.doAfterTextChanged
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,18 +27,17 @@ import com.corson.playbookshighlightswidget.util.DatabaseHelper
 import com.corson.playbookshighlightswidget.util.FirebaseFunctionsHelper
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class TitlesBrowser : AppCompatActivity() {
 
     private lateinit var database: DatabaseReference
+    private val databaseHelper: DatabaseHelper = DatabaseHelper()
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var searchBoxEditText: EditText
@@ -46,9 +46,13 @@ class TitlesBrowser : AppCompatActivity() {
     private lateinit var bookList: ArrayList<BookHighlights> // Should stay constant with initial list
     private lateinit var filteredBookList: ArrayList<BookHighlights> // Reference fed to recycler view
 
+    private lateinit var dialogBuilder: AlertDialog.Builder
+    private lateinit var alertDialog: AlertDialog
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_titles_browser)
+
 
         findViewById<Button>(R.id.signOutButton).setOnClickListener { 
             Firebase.auth.signOut()
@@ -61,25 +65,25 @@ class TitlesBrowser : AppCompatActivity() {
 
         val context = this
 
-
-        database = Firebase.database.reference
+        dialogBuilder = AlertDialog.Builder(context)
+        alertDialog = dialogBuilder.create()
+        alertDialog.setButton(Dialog.BUTTON_POSITIVE, "OK", DialogInterface.OnClickListener {
+                    _, _ ->
+        })
 
         if (Firebase.auth.currentUser == null) {
             startActivity(Intent(this, MainActivity::class.java))
         } else {
 
             filteredBookList =  ArrayList()
-
-            lifecycleScope.launch {
-                try {
-                    bookList = DatabaseHelper().fetchBookHighlights()
+            recyclerView.adapter = BookTitlesAdapter(filteredBookList)
+                databaseHelper.fetchBookHighlights({ bookList ->
+                    filteredBookList.clear()
                     filteredBookList.addAll(bookList)
-                    recyclerView.adapter = BookTitlesAdapter(filteredBookList)
-
-                } catch (e: Exception) {
+                    recyclerView.adapter?.notifyDataSetChanged()
+                }, { e ->
                     Log.w(TAG, "Error fetching book highlights", e)
-                }
-            }
+                })
 
         }
 
@@ -109,46 +113,7 @@ class TitlesBrowser : AppCompatActivity() {
 
                     }
                     R.id.nav_refresh_highlights -> {
-
-
-
-                        lifecycleScope.launch {
-                            try {
-                                println("Highlights before refreshing: ${bookList.flatMap { it.quotes!! }.size}")
-                                // Refresh highlights in backend
-                                FirebaseFunctionsHelper().refreshHighlights().addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        println("Highlights after refreshing: ${bookList.flatMap { it.quotes!! }.size}")
-
-                                        // Re-import the highlights into the app and refresh the recyclerView
-                                        /*bookList = DatabaseHelper().fetchBookHighlights()
-                                        filteredBookList.clear()
-                                        filteredBookList.addAll(bookList)
-                                        recyclerView.adapter?.notifyDataSetChanged()*/
-                                    } else {
-                                        val e = task.exception
-                                        if (e is FirebaseFunctionsException) {
-                                            val code = e.code
-                                            val details = e.details
-                                            Log.w(TAG, "Failed to refresh highlights (Firebase error ${code}): $details")
-                                        } else {
-                                            Log.w(TAG, "Failed to refresh highlights: ", e)
-                                        }
-                                    }
-                                }
-
-
-
-
-
-
-
-
-                            } catch (e: Exception) {
-                                Log.w(TAG, "Error refreshing book highlights", e)
-                            }
-                        }
-
+                        refreshHighlights(context)
                     }
                 }
 
@@ -195,4 +160,52 @@ class TitlesBrowser : AppCompatActivity() {
 
         recyclerView.adapter?.notifyDataSetChanged()
     }
+
+    private fun refreshHighlights(context: Context) {
+        lifecycleScope.launch {
+            try {
+                showAlert("Refreshing highlights...")
+                // Refresh highlights in backend
+                val taskId = Random.nextInt(1000000)
+                FirebaseFunctionsHelper().refreshHighlights(taskId).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        showAlert("Successfully refreshed highlights.")
+                        alertDialog.getButton(Dialog.BUTTON_POSITIVE).visibility = View.VISIBLE
+                        // Re-import the highlights into the app and refresh the recyclerView
+                        /*bookList = DatabaseHelper().fetchBookHighlights()
+                        filteredBookList.clear()
+                        filteredBookList.addAll(bookList)
+                        recyclerView.adapter?.notifyDataSetChanged()*/
+                    } else {
+                        showAlert("Failed to refresh highlights.")
+                        val e = task.exception
+                        if (e is FirebaseFunctionsException) {
+                            val code = e.code
+                            val details = e.details
+                            Log.w(TAG, "Failed to refresh highlights (Firebase error ${code}): $details")
+                        } else {
+                            Log.w(TAG, "Failed to refresh highlights: ", e)
+                        }
+                    }
+                }
+
+                databaseHelper.listenForTaskProgress(taskId) { message ->
+                    showAlert(message)
+                }
+
+
+            } catch (e: Exception) {
+                Log.w(TAG, "Error refreshing book highlights", e)
+            }
+        }
+
+    }
+
+    private fun showAlert(message: String) {
+        alertDialog.setMessage(message)
+        alertDialog.show()
+        alertDialog.getButton(Dialog.BUTTON_POSITIVE).visibility = View.GONE
+    }
+
+
 }
