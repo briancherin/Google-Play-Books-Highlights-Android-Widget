@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.corson.playbookshighlightswidget.higlights_recycler_view.BookTitlesAdapter
 import com.corson.playbookshighlightswidget.model.BookHighlights
 import com.corson.playbookshighlightswidget.util.DatabaseHelper
+import com.corson.playbookshighlightswidget.util.FirebaseFunctionsHelper
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
@@ -30,6 +31,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
+import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
@@ -104,6 +106,48 @@ class TitlesBrowser : AppCompatActivity() {
                             }, null)
                     }
                     R.id.nav_show_notes_toggle -> {
+
+                    }
+                    R.id.nav_refresh_highlights -> {
+
+
+
+                        lifecycleScope.launch {
+                            try {
+                                println("Highlights before refreshing: ${bookList.flatMap { it.quotes!! }.size}")
+                                // Refresh highlights in backend
+                                FirebaseFunctionsHelper().refreshHighlights().addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        println("Highlights after refreshing: ${bookList.flatMap { it.quotes!! }.size}")
+
+                                        // Re-import the highlights into the app and refresh the recyclerView
+                                        /*bookList = DatabaseHelper().fetchBookHighlights()
+                                        filteredBookList.clear()
+                                        filteredBookList.addAll(bookList)
+                                        recyclerView.adapter?.notifyDataSetChanged()*/
+                                    } else {
+                                        val e = task.exception
+                                        if (e is FirebaseFunctionsException) {
+                                            val code = e.code
+                                            val details = e.details
+                                            Log.w(TAG, "Failed to refresh highlights (Firebase error ${code}): $details")
+                                        } else {
+                                            Log.w(TAG, "Failed to refresh highlights: ", e)
+                                        }
+                                    }
+                                }
+
+
+
+
+
+
+
+
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Error refreshing book highlights", e)
+                            }
+                        }
 
                     }
                 }
