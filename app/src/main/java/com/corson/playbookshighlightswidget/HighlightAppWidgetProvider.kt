@@ -19,21 +19,35 @@ class HighlightAppWidgetProvider: AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
 
-
-        DatabaseHelper().fetchBookHighlights({ bookList ->
-            val highlights: List<Highlight> = bookList.flatMap { it.quotes!! }
-
             appWidgetIds.forEach { appWidgetId ->
 
-                println("IN onUPDATE FOR WIDGET $appWidgetId")
+//                println("IN onUPDATE FOR WIDGET $appWidgetId")
 
+                refreshHighlight(context, appWidgetId)
+            }
+    }
 
+    override fun onReceive(context: Context, intent: Intent) {
+        println("Widget intent received: ${intent.action}")
+        println("Widget intent extra: ${intent.getIntExtra("widgetId", -1)}")
+        when (intent.action) {
+            ACTION_REFRESH -> refreshHighlight(context, intent.extras!!.getInt("widgetId"))
+
+        }
+
+        super.onReceive(context, intent)
+    }
+
+    private fun refreshHighlight(context: Context, appWidgetId: Int) {
+        val views: RemoteViews = RemoteViews(
+            context.packageName,
+            R.layout.highlight_widget1
+        ).apply {
+
+            DatabaseHelper().fetchBookHighlights({ bookList ->
+                val highlights: List<Highlight> = bookList.flatMap { it.quotes!! }
                 val randomHighlight = highlights.random()
 
-                val views: RemoteViews = RemoteViews(
-                    context.packageName,
-                    R.layout.highlight_widget1
-                ).apply {
                     setTextViewText(R.id.widget_highlight_text, randomHighlight.quoteText)
                     setTextViewText(R.id.widget_highlight_date, randomHighlight.dateHighlighted)
                     setTextViewText(R.id.widget_highlight_title, randomHighlight.bookTitle)
@@ -55,54 +69,24 @@ class HighlightAppWidgetProvider: AppWidgetProvider() {
                         )
                     )
 
+                    val openHighlightIntent = Intent(context, SingleHighlight::class.java)
+                    // Needs to be unique action so it doesn't cache the intent
+                    openHighlightIntent.action = "singleHighlight-${System.currentTimeMillis()}"
+                    openHighlightIntent.putExtra("highlight", randomHighlight)
+                    //Intent(context, Highlight::class.java)
+
                     setOnClickPendingIntent(
                         R.id.widget_relative_layout, PendingIntent.getActivity(
                             context,
-                            0,
-                            Intent(context, Highlight::class.java),
-                            PendingIntent.FLAG_IMMUTABLE
+                            appWidgetId,
+                            openHighlightIntent,
+                            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                         )
                     )
 
 
-                }
-
-                appWidgetManager.updateAppWidget(appWidgetId, views)
-            }
-
-        }, {e->})
-    }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        println("Widget intent received: ${intent.action}")
-        println("Widget intent extra: ${intent.getIntExtra("widgetId", -1)}")
-        when (intent.action) {
-            ACTION_REFRESH -> refreshHighlight(context, intent.extras!!.getInt("widgetId"))
-
-        }
-
-        super.onReceive(context, intent)
-    }
-
-    fun refreshHighlight(context: Context, appWidgetId: Int) {
-        val views: RemoteViews = RemoteViews(
-            context.packageName,
-            R.layout.highlight_widget1
-        ).apply {
-
-            DatabaseHelper().fetchBookHighlights({ bookList ->
-                val highlights: List<Highlight> = bookList.flatMap { it.quotes!! }
-                val randomHighlight = highlights.random()
-
-                setTextViewText(R.id.widget_highlight_text, randomHighlight.quoteText)
-                setTextViewText(R.id.widget_highlight_date, randomHighlight.dateHighlighted)
-                setTextViewText(R.id.widget_highlight_title, randomHighlight.bookTitle)
-
-                println("Got random highlight: ${randomHighlight.quoteText}")
-
-                println("Attempting to update widget id ${appWidgetId}")
-
                 AppWidgetManager.getInstance(context).updateAppWidget(appWidgetId, this)
+
             }, {e->})
         }
 

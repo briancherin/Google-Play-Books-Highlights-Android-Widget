@@ -23,23 +23,10 @@
         android:textSize="20sp" />
 
     <TextView
-        android:id="@+id/widget_highlight_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/widget_highlight_text"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginHorizontal="30dp"
-        android:layout_marginVertical="15dp"
-        android:text="Highlight Date"
-        android:textAlignment="center"
-        android:textSize="20sp" />
-
-    <TextView
         android:id="@+id/widget_highlight_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/widget_highlight_date"
+        android:layout_below="@+id/widget_highlight_text"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_marginHorizontal="30dp"
@@ -48,11 +35,24 @@
         android:textAlignment="center"
         android:textSize="20sp" />
 
+    <TextView
+        android:id="@+id/widget_highlight_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/widget_highlight_title"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginVertical="15dp"
+        android:text="Highlight Date"
+        android:textAlignment="center"
+        android:textSize="20sp" />
+
     <Button
         android:id="@+id/widget_button_refresh1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/widget_highlight_title"
+        android:layout_below="@+id/widget_highlight_date"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:text="Refresh" />
