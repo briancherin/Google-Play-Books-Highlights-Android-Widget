@@ -75,11 +75,13 @@ class TitlesBrowser : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
         } else {
 
+            bookList =  ArrayList()
             filteredBookList =  ArrayList()
             recyclerView.adapter = BookTitlesAdapter(filteredBookList)
-                databaseHelper.fetchBookHighlights({ bookList ->
+                databaseHelper.fetchBookHighlights({ fetchedBookList ->
                     filteredBookList.clear()
-                    filteredBookList.addAll(bookList)
+                    filteredBookList.addAll(fetchedBookList)
+                    bookList.addAll(fetchedBookList)
                     recyclerView.adapter?.notifyDataSetChanged()
                 }, { e ->
                     Log.w(TAG, "Error fetching book highlights", e)
