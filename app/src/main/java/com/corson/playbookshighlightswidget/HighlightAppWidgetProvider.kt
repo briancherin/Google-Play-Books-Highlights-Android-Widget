@@ -5,6 +5,8 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.view.View
 import android.widget.RemoteViews
 import com.corson.playbookshighlightswidget.model.Highlight
 import com.corson.playbookshighlightswidget.util.DatabaseHelper
@@ -51,6 +53,14 @@ class HighlightAppWidgetProvider: AppWidgetProvider() {
                     setTextViewText(R.id.widget_highlight_text, randomHighlight.quoteText)
                     setTextViewText(R.id.widget_highlight_date, randomHighlight.dateHighlighted)
                     setTextViewText(R.id.widget_highlight_title, randomHighlight.bookTitle)
+                    setViewVisibility(R.id.widget_highlight_has_note,
+                        if (randomHighlight.highlightNotes == null || randomHighlight.highlightNotes!!.isEmpty())
+                            View.INVISIBLE
+                        else
+                            View.VISIBLE
+                        )
+
+                    setInt(R.id.widget_highlight_text, "setBackgroundColor", Color.parseColor(randomHighlight.highlightColor))
 
 
                     val intent = Intent(context, HighlightAppWidgetProvider::class.java).apply {
@@ -61,7 +71,7 @@ class HighlightAppWidgetProvider: AppWidgetProvider() {
                     println("Put extra: ${intent.getIntExtra("widgetId", -1)}")
 
                     setOnClickPendingIntent(
-                        R.id.widget_button_refresh1, PendingIntent.getBroadcast(
+                        R.id.widget_button_refresh, PendingIntent.getBroadcast(
                             context,
                             appWidgetId,
                             intent,
