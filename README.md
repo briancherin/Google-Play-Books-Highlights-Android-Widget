@@ -16,7 +16,9 @@ Complete!
 
 ## Demo
 **Highlights Browser:**
-<img src="demo/highlights-browser-demo.gif" width=150/>
+
+<img src="demo/highlights-browser-demo.gif" width="200"/>
 
 **Homescreen Widget:**
-<img src="demo/highlights-widget-demo.gif" width=150/>
+
+<img src="demo/highlights-widget-demo.gif" width="200"/>
