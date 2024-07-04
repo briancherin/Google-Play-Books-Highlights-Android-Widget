@@ -1,31 +1,25 @@
-package com.corson.playbookshighlightswidget.util
+package com.corson.playbookshighlightswidget.client.firebase
 
 import android.content.ContentValues
-import android.content.Intent
 import android.util.Log
-import com.corson.playbookshighlightswidget.MainActivity
-import com.corson.playbookshighlightswidget.higlights_recycler_view.BookTitlesAdapter
-import com.corson.playbookshighlightswidget.model.BookHighlights
 import com.corson.playbookshighlightswidget.model.Task
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.core.Tag
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
-class DatabaseHelper {
+class FirebaseDatabaseHelper {
 
     private val database = Firebase.database.reference
 
-    fun fetchBookHighlights(callback: (ArrayList<BookHighlights>) -> Unit, onError: (Throwable) -> Unit)  {
-
+    suspend fun fetchBookHighlights(): ArrayList<FirebaseBookHighlightsEntity> = suspendCoroutine{ continuation ->
         if (Firebase.auth.currentUser == null) {
-            onError(Throwable("User not logged in"))
+            continuation.resumeWithException(Throwable("User not logged in"))
         } else {
             val userId = Firebase.auth.currentUser?.uid
 
@@ -35,30 +29,33 @@ class DatabaseHelper {
                 .child("highlights")
                 .orderByChild("dateModified") //Sort by latest added
 
-            val bookList = ArrayList<BookHighlights>()
+            val bookList = ArrayList<FirebaseBookHighlightsEntity>()
 
             userHighlightsRef.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     for (highlightSnapshot in snapshot.children) {
-                        val h: BookHighlights? =
-                            highlightSnapshot.getValue(BookHighlights::class.java)
+                        val h: FirebaseBookHighlightsEntity? =
+                            highlightSnapshot.getValue(FirebaseBookHighlightsEntity::class.java)
 
                         if (h?.title != null) {
                             bookList.add(h)
                         }
                     }
                     bookList.reverse() // Reverse sorted order
-                    callback(bookList)
+
+                    // Return highlights to caller
+                    continuation.resume(bookList);
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     Log.w(ContentValues.TAG, "loadHighlights:onCancelled", error.toException())
-                    onError(error.toException())
+                    continuation.resumeWithException(error.toException())
                 }
             })
 
         }
     }
+
 
     fun listenForTaskProgress(taskId: Int, onProgress: (message: String) -> Unit) {
         val userId = Firebase.auth.currentUser?.uid

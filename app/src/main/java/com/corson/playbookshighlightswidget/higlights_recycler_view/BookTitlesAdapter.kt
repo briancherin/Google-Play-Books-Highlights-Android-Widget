@@ -1,7 +1,6 @@
 package com.corson.playbookshighlightswidget.higlights_recycler_view
 
 import android.content.Intent
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +10,10 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.corson.playbookshighlightswidget.HighlightsBrowser
 import com.corson.playbookshighlightswidget.R
-import com.corson.playbookshighlightswidget.model.BookHighlights
+import com.corson.playbookshighlightswidget.model.BookMetadata
 
 // https://developer.android.com/develop/ui/views/layout/recyclerview#kotlin
-class BookTitlesAdapter(private val bookList: ArrayList<BookHighlights>) :
+class BookTitlesAdapter(private val bookList: ArrayList<BookMetadata>) :
         RecyclerView.Adapter<BookTitlesAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

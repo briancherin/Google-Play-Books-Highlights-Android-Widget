@@ -18,4 +18,9 @@
         app:actionViewClass="android.widget.Switch"
         />
 
+    <item
+        android:id="@+id/nav_clear_cache"
+        android:title="Clear cache"
+        />
+
 </menu>

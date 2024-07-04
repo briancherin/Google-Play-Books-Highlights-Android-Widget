@@ -22,13 +22,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.corson.playbookshighlightswidget.higlights_recycler_view.BookTitlesAdapter
-import com.corson.playbookshighlightswidget.model.BookHighlights
-import com.corson.playbookshighlightswidget.util.DatabaseHelper
-import com.corson.playbookshighlightswidget.util.FirebaseFunctionsHelper
+import com.corson.playbookshighlightswidget.client.firebase.FirebaseBookHighlightsEntity
+import com.corson.playbookshighlightswidget.client.firebase.FirebaseDatabaseHelper
+import com.corson.playbookshighlightswidget.client.firebase.FirebaseFunctionsHelper
+import com.corson.playbookshighlightswidget.client.room_cache.CacheHelper
+import com.corson.playbookshighlightswidget.model.BookMetadata
+import com.corson.playbookshighlightswidget.repository.HighlightsRepository
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ktx.database
 import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
@@ -37,14 +39,14 @@ import kotlin.random.Random
 class TitlesBrowser : AppCompatActivity() {
 
     private lateinit var database: DatabaseReference
-    private val databaseHelper: DatabaseHelper = DatabaseHelper()
+    private val databaseHelper: FirebaseDatabaseHelper = FirebaseDatabaseHelper()
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var searchBoxEditText: EditText
     private lateinit var actionBarDrawerToggle: ActionBarDrawerToggle
 
-    private lateinit var bookList: ArrayList<BookHighlights> // Should stay constant with initial list
-    private lateinit var filteredBookList: ArrayList<BookHighlights> // Reference fed to recycler view
+    private lateinit var bookList: ArrayList<BookMetadata> // Should stay constant with initial list
+    private lateinit var filteredBookList: ArrayList<BookMetadata> // Reference fed to recycler view
 
     private lateinit var dialogBuilder: AlertDialog.Builder
     private lateinit var alertDialog: AlertDialog
@@ -52,6 +54,8 @@ class TitlesBrowser : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_titles_browser)
+
+        val highlightsRepository = HighlightsRepository(applicationContext)
 
 
         findViewById<Button>(R.id.signOutButton).setOnClickListener { 
@@ -74,18 +78,21 @@ class TitlesBrowser : AppCompatActivity() {
         if (Firebase.auth.currentUser == null) {
             startActivity(Intent(this, MainActivity::class.java))
         } else {
-
             bookList =  ArrayList()
             filteredBookList =  ArrayList()
             recyclerView.adapter = BookTitlesAdapter(filteredBookList)
-                databaseHelper.fetchBookHighlights({ fetchedBookList ->
+
+            lifecycleScope.launch {
+                try {
+                    val books = highlightsRepository.getSortedBookList()
                     filteredBookList.clear()
-                    filteredBookList.addAll(fetchedBookList)
-                    bookList.addAll(fetchedBookList)
+                    filteredBookList.addAll(books)
+                    bookList.addAll(books)
                     recyclerView.adapter?.notifyDataSetChanged()
-                }, { e ->
-                    Log.w(TAG, "Error fetching book highlights", e)
-                })
+                } catch (e: Exception) {
+                    Log.w(TAG, "Erorr loading book titles in TitlesBrowser", e)
+                }
+            }
 
         }
 
@@ -116,6 +123,11 @@ class TitlesBrowser : AppCompatActivity() {
                     }
                     R.id.nav_refresh_highlights -> {
                         refreshHighlights(context)
+                    }
+                    R.id.nav_clear_cache -> {
+                        lifecycleScope.launch {
+                            CacheHelper(applicationContext).clearCache()
+                        }
                     }
                 }
 
@@ -169,25 +181,18 @@ class TitlesBrowser : AppCompatActivity() {
                 showAlert("Refreshing highlights...")
                 // Refresh highlights in backend
                 val taskId = Random.nextInt(1000000)
-                FirebaseFunctionsHelper().refreshHighlights(taskId).addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        showAlert("Successfully refreshed highlights.")
-                        alertDialog.getButton(Dialog.BUTTON_POSITIVE).visibility = View.VISIBLE
-                        // Re-import the highlights into the app and refresh the recyclerView
-                        /*bookList = DatabaseHelper().fetchBookHighlights()
-                        filteredBookList.clear()
-                        filteredBookList.addAll(bookList)
-                        recyclerView.adapter?.notifyDataSetChanged()*/
+                try {
+                    val result = FirebaseFunctionsHelper().refreshHighlights(taskId)
+                    showAlert("Successfully refreshed highlights.")
+                    alertDialog.getButton(Dialog.BUTTON_POSITIVE).visibility = View.VISIBLE
+                } catch (e: Exception) {
+                    showAlert("Failed to refresh highlights.")
+                    if (e is FirebaseFunctionsException) {
+                        val code = e.code
+                        val details = e.details
+                        Log.w(TAG, "Failed to refresh highlights (Firebase error ${code}): $details")
                     } else {
-                        showAlert("Failed to refresh highlights.")
-                        val e = task.exception
-                        if (e is FirebaseFunctionsException) {
-                            val code = e.code
-                            val details = e.details
-                            Log.w(TAG, "Failed to refresh highlights (Firebase error ${code}): $details")
-                        } else {
-                            Log.w(TAG, "Failed to refresh highlights: ", e)
-                        }
+                        Log.w(TAG, "Failed to refresh highlights: ", e)
                     }
                 }
 
